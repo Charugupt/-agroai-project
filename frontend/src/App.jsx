@@ -14,7 +14,7 @@ import UploadBox from './components/UploadBox';
 import ResultCard from './components/ResultCard';
 import HistoryDashboard from './components/HistoryDashboard';
 
-const API_URL = 'https://agroai-backend-1h3o.onrender.com/api/upload';
+const API_URL = 'https://agroai-backend-1h3o.onrender.com/predict';
 
 function App() {
   const [view, setView] = useState('landing');
@@ -35,12 +35,29 @@ function App() {
     formData.append('file', file);
 
     try {
-      const response = await axios.post(API_URL, formData);
-      setResult(response.data);
+      const response = await axios.post(API_URL, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        },
+        timeout: 30000
+      });
+
+      const data = response.data;
+
+      setResult({
+        image: URL.createObjectURL(file),
+        disease: data.disease || "Unknown",
+        confidence: data.confidence || 0,
+        diagnosis: data.diagnosis || "No data available",
+        treatment: data.treatment || "No treatment info",
+        prevention: data.prevention || "No prevention info"
+      });
+
       setView('result');
+
     } catch (err) {
-      console.error(err);
-      setError('Analysis failed. Backend or ML service might be offline.');
+      console.error("API ERROR:", err);
+      setError("❌ Backend not responding or wrong API");
     } finally {
       setIsLoading(false);
     }
