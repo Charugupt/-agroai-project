@@ -7,6 +7,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get("/", (req, res) => {
+    res.send("Backend is running 🚀");
+});
+
 // Multer setup (for file upload)
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -28,7 +32,7 @@ const DISEASE_DATA = {
 };
 
 // 👉 Upload + Predict API
-app.post("/api/upload", upload.single("file"), async (req, res) => {
+app.post("/predict", upload.single("file"), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: "No file uploaded" });
@@ -36,7 +40,6 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
 
         const imageBuffer = req.file.buffer;
 
-        // 🔥 Call Hugging Face API
         const response = await axios.post(HF_API, imageBuffer, {
             headers: {
                 Authorization: `Bearer ${HF_TOKEN}`,
@@ -44,9 +47,11 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
             },
         });
 
-        const result = response.data;
+        // ✅ SAFE handling (very important)
+        const result = Array.isArray(response.data)
+            ? response.data
+            : [];
 
-        // 👉 Extract prediction
         const disease = result[0]?.label || "Unknown";
         const confidence = (result[0]?.score || 0) * 100;
 
@@ -64,11 +69,12 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
             treatment: info.treatment,
             prevention: info.prevention,
         });
+
     } catch (error) {
-        console.error(error.message);
+        console.error("ERROR:", error.response?.data || error.message);
+
         res.status(500).json({
             error: "Prediction failed",
-            details: error.message,
         });
     }
 });
