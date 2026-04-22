@@ -10,7 +10,7 @@ const Scan = require('./models/Scan');
 
 const app = express();
 const port = 3000;
-const FLASK_URL = 'http://localhost:5000/predict';
+const FLASK_URL = 'https://agroai-ml.onrender.com/predict';
 
 // MongoDB Connection
 const MONGO_URI = 'mongodb+srv://sonalgupta8291_db_user:sonal%4010@cluster0.2my6fbk.mongodb.net/?appName=Cluster0';
