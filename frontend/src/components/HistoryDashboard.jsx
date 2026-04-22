@@ -13,7 +13,7 @@ const HistoryDashboard = ({ onBack, onViewReport }) => {
 
   const fetchHistory = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/history');
+      const response = await axios.get('https://agroai-backend-1h3o.onrender.com/api/history');
       setHistory(response.data);
     } catch (error) {
       console.error('Error fetching history:', error);
@@ -26,7 +26,7 @@ const HistoryDashboard = ({ onBack, onViewReport }) => {
   const handleDelete = async (id) => {
     try {
       // OPTIONAL: backend delete (if API exists)
-      await axios.delete(`http://localhost:3000/api/history/${id}`);
+      await axios.delete(`https://agroai-backend-1h3o.onrender.com/api/history/${id}`);
 
       // frontend update
       setHistory((prev) => prev.filter(item => item._id !== id));

@@ -14,7 +14,7 @@ import UploadBox from './components/UploadBox';
 import ResultCard from './components/ResultCard';
 import HistoryDashboard from './components/HistoryDashboard';
 
-const API_URL = 'http://localhost:3000/api/upload';
+const API_URL = 'https://agroai-backend-1h3o.onrender.com/api/upload';
 
 function App() {
   const [view, setView] = useState('landing');
@@ -66,7 +66,7 @@ function App() {
 
   return (
     <div className="min-h-screen gradient-bg selection:bg-emerald-500/30 overflow-x-hidden">
-      
+
       <Navbar
         onHistory={() => setView('history')}
         onHome={reset}
@@ -139,8 +139,8 @@ function App() {
                   { img: blightImg, title: "Leaf Blight", desc: "Water-soaked lesions that rapidly turn brown and necrotic." },
                   { img: mildewImg, title: "Powdery Mildew", desc: "White, flour-like fungal growth on leaf surfaces." }
                 ].map((item, i) => (
-                  <motion.div 
-                    key={i} 
+                  <motion.div
+                    key={i}
                     whileHover={{ y: -10 }}
                     className="glass-card overflow-hidden rounded-[2.5rem] border-white/5 group"
                   >
@@ -159,7 +159,7 @@ function App() {
 
           {/* LANDING */}
           {view === 'landing' && (
-            <motion.div 
+            <motion.div
               key="landing"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -171,7 +171,7 @@ function App() {
 
           {/* ANALYSIS */}
           {view === 'analysis' && (
-            <motion.div 
+            <motion.div
               key="analysis"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -180,7 +180,7 @@ function App() {
               <UploadBox onAnalyze={handleAnalyze} isLoading={isLoading} />
               <AnimatePresence>
                 {error && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="mt-4 text-red-400 text-center font-bold bg-red-500/10 p-4 rounded-2xl max-w-md mx-auto border border-red-500/20"
@@ -194,7 +194,7 @@ function App() {
 
           {/* RESULT */}
           {view === 'result' && result && (
-            <motion.div 
+            <motion.div
               key="result"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -206,7 +206,7 @@ function App() {
 
           {/* HISTORY */}
           {view === 'history' && (
-            <motion.div 
+            <motion.div
               key="history"
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
@@ -221,10 +221,10 @@ function App() {
       <footer className="py-20 border-t border-white/5 bg-black/20">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-2">
-             <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center">
-                <span className="text-emerald-500 font-bold">A</span>
-             </div>
-             <span className="text-xl font-black tracking-tighter">AgroAI</span>
+            <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+              <span className="text-emerald-500 font-bold">A</span>
+            </div>
+            <span className="text-xl font-black tracking-tighter">AgroAI</span>
           </div>
           <p className="text-slate-500 text-sm">
             © 2026 AgroAI Intelligence Systems. Secure Agricultural Diagnostics.
