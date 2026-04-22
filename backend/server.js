@@ -7,6 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Test route
 app.get("/", (req, res) => {
     res.send("Backend is running 🚀");
 });
@@ -15,14 +16,13 @@ app.get("/", (req, res) => {
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// 👉 Hugging Face API
+// Hugging Face API
 const HF_API =
-    "https://api-inference.huggingface.co/models/linkanjarad/mobilenet_v2_1.0_224-plant-disease-identification";
+    "https://api-inference.huggingface.co/models/linkanjarad/mobilenet_v2_1.0_224-plant-disease-identification?wait_for_model=true";
 
-// 🔑 PUT YOUR TOKEN HERE
 const HF_TOKEN = process.env.HF_TOKEN;
 
-// 👉 Disease Info (you can expand this)
+// Disease Info
 const DISEASE_DATA = {
     Healthy: {
         diagnosis: "The plant appears healthy.",
@@ -31,7 +31,7 @@ const DISEASE_DATA = {
     },
 };
 
-// 👉 Upload + Predict API
+// Predict API
 app.post("/predict", upload.single("file"), async (req, res) => {
     try {
         if (!req.file) {
@@ -40,6 +40,7 @@ app.post("/predict", upload.single("file"), async (req, res) => {
 
         const imageBuffer = req.file.buffer;
 
+        // 🔥 Hugging Face Call (FINAL FIXED)
         const response = await axios({
             method: "POST",
             url: HF_API,
@@ -48,19 +49,29 @@ app.post("/predict", upload.single("file"), async (req, res) => {
                 "Content-Type": "application/octet-stream",
             },
             data: imageBuffer,
+            timeout: 60000,
         });
 
-        // Debug log (important)
         console.log("HF RESPONSE:", response.data);
 
-        // ✅ SAFE handling (very important)
-        const result = Array.isArray(response.data)
-            ? response.data
-            : [];
+        // Safe handling
+        let result = [];
 
+        if (Array.isArray(response.data)) {
+            result = response.data;
+        } else if (response.data?.error) {
+            console.log("HF ERROR:", response.data.error);
+            throw new Error(response.data.error);
+        } else {
+            console.log("UNKNOWN RESPONSE:", response.data);
+            throw new Error("Invalid response from model");
+        }
+
+        // Extract prediction
         const disease = result[0]?.label || "Unknown";
         const confidence = (result[0]?.score || 0) * 100;
 
+        // Get info
         const info =
             DISEASE_DATA[disease] || {
                 diagnosis: "Data not available",
@@ -68,6 +79,7 @@ app.post("/predict", upload.single("file"), async (req, res) => {
                 prevention: "Maintain plant hygiene",
             };
 
+        // Send response
         res.json({
             disease,
             confidence: confidence.toFixed(2),
@@ -85,7 +97,7 @@ app.post("/predict", upload.single("file"), async (req, res) => {
     }
 });
 
-// 👉 Server start
+// Server start
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
