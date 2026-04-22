@@ -40,12 +40,18 @@ app.post("/predict", upload.single("file"), async (req, res) => {
 
         const imageBuffer = req.file.buffer;
 
-        const response = await axios.post(HF_API, imageBuffer, {
+        const response = await axios({
+            method: "POST",
+            url: HF_API,
             headers: {
                 Authorization: `Bearer ${HF_TOKEN}`,
                 "Content-Type": "application/octet-stream",
             },
+            data: imageBuffer,
         });
+
+        // Debug log (important)
+        console.log("HF RESPONSE:", response.data);
 
         // ✅ SAFE handling (very important)
         const result = Array.isArray(response.data)
