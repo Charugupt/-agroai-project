@@ -8,7 +8,11 @@ const axios = require("axios");
 console.log("HF TOKEN 👉", process.env.HF_TOKEN ? "Loaded ✅" : "Missing ❌");
 
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: "*",
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"]
+}));
 app.use(express.json());
 
 // Test route
@@ -45,6 +49,7 @@ app.post("/predict", upload.single("file"), async (req, res) => {
         const imageBuffer = req.file.buffer;
 
         console.log("🚀 Sending to Hugging Face...");
+        console.log("API HIT");
 
         const response = await axios.post(
             HF_API,
