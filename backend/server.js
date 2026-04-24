@@ -1,7 +1,11 @@
+require("dotenv").config();
+
 const express = require("express");
 const multer = require("multer");
 const cors = require("cors");
 const axios = require("axios");
+
+console.log("HF TOKEN 👉", process.env.HF_TOKEN);
 
 const app = express();
 app.use(cors());
@@ -89,10 +93,10 @@ app.post("/predict", upload.single("file"), async (req, res) => {
         });
 
     } catch (error) {
-        console.error("ERROR:", error.response?.data || error.message);
+        console.error("FULL ERROR:", error.response?.data || error.message);
 
         res.status(500).json({
-            error: "Prediction failed",
+            error: error.response?.data || error.message,
         });
     }
 });
