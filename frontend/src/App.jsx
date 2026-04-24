@@ -14,7 +14,7 @@ import UploadBox from './components/UploadBox';
 import ResultCard from './components/ResultCard';
 import HistoryDashboard from './components/HistoryDashboard';
 
-// ✅ YOUR BACKEND URL
+// ✅ BACKEND URL
 const API_URL = "https://agroai-server-5iuu.onrender.com/predict";
 
 function App() {
@@ -38,11 +38,9 @@ function App() {
     try {
       console.log("🚀 Calling API:", API_URL);
 
+      // ✅ FIXED REQUEST (NO HEADERS)
       const response = await axios.post(API_URL, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data"
-        },
-        timeout: 60000 // ⬅️ VERY IMPORTANT
+        timeout: 60000
       });
 
       console.log("✅ RESPONSE:", response.data);
@@ -106,14 +104,12 @@ function App() {
 
         <AnimatePresence mode="wait">
 
-          {/* LANDING */}
           {view === 'landing' && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
               <Hero onStart={() => setView('analysis')} />
             </motion.div>
           )}
 
-          {/* ANALYSIS */}
           {view === 'analysis' && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
               <UploadBox onAnalyze={handleAnalyze} isLoading={isLoading} />
@@ -126,14 +122,12 @@ function App() {
             </motion.div>
           )}
 
-          {/* RESULT */}
           {view === 'result' && result && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
               <ResultCard data={result} image={previewImage} onReset={reset} />
             </motion.div>
           )}
 
-          {/* HISTORY */}
           {view === 'history' && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
               <HistoryDashboard onBack={reset} onViewReport={handleViewReport} />

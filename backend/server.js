@@ -9,6 +9,7 @@ console.log("HF TOKEN 👉", process.env.HF_TOKEN ? "Loaded ✅" : "Missing ❌"
 
 const app = express();
 
+// ✅ CORS FIX (important for frontend)
 app.use(cors({
     origin: "*",
     methods: ["GET", "POST"],
@@ -17,55 +18,59 @@ app.use(cors({
 
 app.use(express.json());
 
-// Test route
+// ✅ TEST ROUTE
 app.get("/", (req, res) => {
     res.send("Backend is running 🚀");
 });
 
-// Multer setup
+// ✅ MULTER (file upload)
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// HF API
+// ✅ HUGGING FACE MODEL
 const HF_API =
     "https://api-inference.huggingface.co/models/linkanjarad/mobilenet_v2_1.0_224-plant-disease-identification";
 
-// Predict Route
+// ✅ PREDICT ROUTE (FINAL FIXED)
 app.post("/predict", upload.single("file"), async (req, res) => {
     try {
         console.log("📥 Request received");
 
+        // ❌ No file check
         if (!req.file) {
+            console.log("❌ FILE NOT RECEIVED");
             return res.status(400).json({ error: "No file uploaded" });
         }
 
-        const imageBuffer = req.file.buffer;
+        // 🔥 CONVERT IMAGE TO BASE64 (CRITICAL FIX)
+        const base64Image = req.file.buffer.toString("base64");
 
         console.log("🚀 Sending to Hugging Face...");
 
         const response = await axios.post(
             HF_API,
-            imageBuffer,
+            {
+                inputs: base64Image
+            },
             {
                 headers: {
                     Authorization: `Bearer ${process.env.HF_TOKEN}`,
-                    "Content-Type": "application/octet-stream",
-                    "x-wait-for-model": "true" // ✅ FIXED
+                    "Content-Type": "application/json"
                 },
-                timeout: 120000,
+                timeout: 120000
             }
         );
 
-        console.log("🧠 HF RESPONSE:", response.data);
+        console.log("✅ HF RESPONSE:", response.data);
 
-        // ✅ Handle HF error safely
-        if (response.data && response.data.error) {
-            return res.status(500).json({
-                error: response.data.error,
+        // ❌ If model still loading
+        if (response.data?.error?.includes("loading")) {
+            return res.status(503).json({
+                error: "Model is loading, try again in few seconds",
             });
         }
 
-        // ✅ Validate response
+        // ❌ Invalid response
         if (!Array.isArray(response.data)) {
             return res.status(500).json({
                 error: "Invalid response from model",
@@ -74,21 +79,22 @@ app.post("/predict", upload.single("file"), async (req, res) => {
 
         const result = response.data;
 
+        // ✅ CLEAN LABEL
         const rawLabel = result[0]?.label || "Unknown";
 
-        // Clean label
         const disease = rawLabel
             .replace("___", " ")
             .replace(/_/g, " ");
 
         const confidence = (result[0]?.score || 0) * 100;
 
+        // ✅ RESPONSE BACK TO FRONTEND
         res.json({
             disease,
             confidence: confidence.toFixed(2),
-            diagnosis: "AI detected plant condition",
-            treatment: "Consult agricultural expert",
-            prevention: "Maintain plant hygiene and monitor regularly",
+            diagnosis: "AI-based diagnosis result",
+            treatment: "Follow proper crop care",
+            prevention: "Use healthy plants & clean environment"
         });
 
     } catch (error) {
@@ -100,8 +106,9 @@ app.post("/predict", upload.single("file"), async (req, res) => {
     }
 });
 
-// Start server
-const PORT = process.env.PORT || 10000;
+// ✅ SERVER START
+const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`🚀 Server running on port ${PORT}`);
 });
