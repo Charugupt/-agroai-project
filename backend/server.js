@@ -20,20 +20,20 @@ app.get("/", (req, res) => {
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// ✅ CORRECT Hugging Face API (NO query params)
+// Hugging Face API
 const HF_API =
     "https://api-inference.huggingface.co/models/linkanjarad/mobilenet_v2_1.0_224-plant-disease-identification";
 
-// Disease Info (you can expand this later)
+// Disease Info (basic)
 const DISEASE_DATA = {
-    Healthy: {
+    "Tomato healthy": {
         diagnosis: "The plant appears healthy.",
         treatment: "No treatment required.",
         prevention: "Maintain proper care and watering.",
     },
 };
 
-// ✅ Predict Route
+// Predict Route
 app.post("/predict", upload.single("file"), async (req, res) => {
     try {
         console.log("📥 Request received");
@@ -46,7 +46,6 @@ app.post("/predict", upload.single("file"), async (req, res) => {
 
         console.log("🚀 Sending to Hugging Face...");
 
-        // ✅ Correct axios usage
         const response = await axios.post(
             HF_API,
             imageBuffer,
@@ -55,19 +54,23 @@ app.post("/predict", upload.single("file"), async (req, res) => {
                     Authorization: `Bearer ${process.env.HF_TOKEN}`,
                     "Content-Type": "application/octet-stream",
                 },
-                timeout: 60000,
+                params: {
+                    wait_for_model: true
+                },
+                timeout: 120000,
             }
         );
 
         console.log("✅ HF RESPONSE:", response.data);
 
-        // ✅ Handle HF error safely
-        if (response.data?.error) {
-            return res.status(500).json({
-                error: response.data.error,
+        // ❌ If model still loading
+        if (response.data?.error?.includes("loading")) {
+            return res.status(503).json({
+                error: "Model is loading, try again in few seconds",
             });
         }
 
+        // ❌ Invalid response
         if (!Array.isArray(response.data)) {
             return res.status(500).json({
                 error: "Invalid response from model",
@@ -76,18 +79,23 @@ app.post("/predict", upload.single("file"), async (req, res) => {
 
         const result = response.data;
 
-        // Extract prediction
-        const disease = result[0]?.label || "Unknown";
+        // 🔥 CLEAN LABEL (VERY IMPORTANT FIX)
+        const rawLabel = result[0]?.label || "Unknown";
+
+        const disease = rawLabel
+            .replace("___", " ")
+            .replace(/_/g, " ");
+
         const confidence = (result[0]?.score || 0) * 100;
 
+        // Info mapping
         const info =
             DISEASE_DATA[disease] || {
-                diagnosis: "Data not available",
-                treatment: "Consult expert",
-                prevention: "Maintain plant hygiene",
+                diagnosis: "Limited model support (Tomato/Potato/Corn only)",
+                treatment: "Try using supported plant types",
+                prevention: "Use clear image of supported crops",
             };
 
-        // Final response
         res.json({
             disease,
             confidence: confidence.toFixed(2),

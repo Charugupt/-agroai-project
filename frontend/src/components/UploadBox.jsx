@@ -10,6 +10,12 @@ const UploadBox = ({ onAnalyze, isLoading }) => {
 
   const handleFileChange = (file) => {
     if (file && file.type.startsWith('image/')) {
+      // ✅ Size check
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Image too large. Please upload under 5MB.");
+        return;
+      }
+
       setSelectedFile(file);
       const imageURL = URL.createObjectURL(file);
       setPreview(imageURL);
@@ -40,12 +46,12 @@ const UploadBox = ({ onAnalyze, isLoading }) => {
         animate={{ opacity: 1, y: 0 }}
         className="glass-card p-8 md:p-16 rounded-[2.5rem] relative overflow-hidden"
       >
-        {/* Decorative background glow */}
+        {/* Background glow */}
         <div className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-500/10 blur-[100px] rounded-full" />
         <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-500/10 blur-[100px] rounded-full" />
 
         <div className="relative z-10 text-center">
-          <motion.div 
+          <motion.div
             initial={{ scale: 0.9 }}
             animate={{ scale: 1 }}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8"
@@ -57,9 +63,12 @@ const UploadBox = ({ onAnalyze, isLoading }) => {
           <h2 className="text-4xl md:text-5xl font-black mb-6 tracking-tight">
             Analyze Your <span className="text-gradient">Crop Health</span>
           </h2>
+
+          {/* ✅ Updated description */}
           <p className="text-slate-400 text-lg mb-12 max-w-2xl mx-auto">
-            Upload a high-quality photo of your plant leaf. Our AI will scan for early signs of 
-            disease and provide actionable recommendations.
+            Upload a clear image of a plant leaf. This AI model is trained mainly on
+            <span className="text-emerald-400 font-semibold"> Tomato, Potato, and Corn </span>
+            crops and detects diseases within these categories.
           </p>
 
           {/* Upload Area */}
@@ -68,11 +77,10 @@ const UploadBox = ({ onAnalyze, isLoading }) => {
             onDragLeave={() => setIsDragging(false)}
             onDrop={onDrop}
             onClick={() => !selectedFile && fileInputRef.current.click()}
-            className={`relative min-h-[350px] border-2 border-dashed rounded-[2rem] transition-all duration-500 flex flex-col items-center justify-center overflow-hidden group ${
-              isDragging
+            className={`relative min-h-[350px] border-2 border-dashed rounded-[2rem] transition-all duration-500 flex flex-col items-center justify-center overflow-hidden group ${isDragging
                 ? 'border-emerald-500 bg-emerald-500/5'
                 : 'border-white/10 hover:border-emerald-500/50 hover:bg-white/[0.02]'
-            } ${selectedFile ? 'cursor-default border-solid border-white/10' : 'cursor-pointer'}`}
+              } ${selectedFile ? 'cursor-default border-solid border-white/10' : 'cursor-pointer'}`}
           >
             <input
               type="file"
@@ -94,11 +102,15 @@ const UploadBox = ({ onAnalyze, isLoading }) => {
                   <div className="w-24 h-24 bg-emerald-500/10 rounded-[2rem] flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
                     <Upload className="w-10 h-10 text-emerald-500" />
                   </div>
+
+                  {/* ✅ Updated text */}
                   <p className="text-2xl font-bold mb-3">
-                    {isDragging ? 'Drop it here!' : 'Select leaf image'}
+                    {isDragging ? 'Drop it here!' : 'Select supported leaf image'}
                   </p>
+
                   <p className="text-slate-500 text-center max-w-xs">
-                    Drag & drop or click to browse. Supports JPG, PNG or WEBP.
+                    Drag & drop or click to browse. Supports JPG, PNG or WEBP
+                    (best for Tomato, Potato, Corn).
                   </p>
                 </motion.div>
               ) : (
@@ -115,8 +127,7 @@ const UploadBox = ({ onAnalyze, isLoading }) => {
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-black/20" />
-                    
-                    {/* Remove button */}
+
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -146,7 +157,7 @@ const UploadBox = ({ onAnalyze, isLoading }) => {
               {isLoading ? (
                 <>
                   <Loader2 className="w-6 h-6 animate-spin" />
-                  Analyzing Tissue...
+                  Analyzing Leaf Image...
                 </>
               ) : (
                 <>
@@ -158,7 +169,7 @@ const UploadBox = ({ onAnalyze, isLoading }) => {
 
             <AnimatePresence>
               {isLoading && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="flex items-center gap-3 text-emerald-400 font-medium italic"
@@ -168,14 +179,15 @@ const UploadBox = ({ onAnalyze, isLoading }) => {
                     <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce [animation-delay:0.2s]" />
                     <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce [animation-delay:0.4s]" />
                   </div>
-                  Processing neural pathways...
+                  AI is analyzing plant health...
                 </motion.div>
               )}
             </AnimatePresence>
 
-            <div className="flex items-center gap-2 text-sm text-slate-500 bg-white/5 px-4 py-2 rounded-full border border-white/5">
+            {/* ✅ Updated warning */}
+            <div className="flex items-center gap-2 text-sm text-yellow-400 bg-yellow-500/10 px-4 py-2 rounded-full border border-yellow-500/20">
               <AlertCircle className="w-4 h-4" />
-              Upload clear leaf images for 99.2% accuracy.
+              Model works best for Tomato, Potato & Corn plants only
             </div>
           </div>
         </div>

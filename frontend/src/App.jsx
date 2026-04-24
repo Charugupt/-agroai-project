@@ -14,7 +14,7 @@ import UploadBox from './components/UploadBox';
 import ResultCard from './components/ResultCard';
 import HistoryDashboard from './components/HistoryDashboard';
 
-const API_URL = 'https://agroai-backend-1h3o.onrender.com/predict';
+const API_URL = "https://agroai-server-5iuu.onrender.com/predict";
 
 function App() {
   const [view, setView] = useState('landing');
