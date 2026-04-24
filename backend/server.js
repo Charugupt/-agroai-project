@@ -42,19 +42,24 @@ app.post("/predict", upload.single("file"), async (req, res) => {
 
         console.log("🚀 Sending to HuggingFace...");
 
-        const response = await axios.post(
-            HF_API,
-            {
-                inputs: base64Image
+        if (!process.env.HF_TOKEN) {
+            return res.status(500).json({ error: "HF_TOKEN missing in environment" });
+        }
+
+        const response = await axios({
+            method: "POST",
+            url: HF_API,
+            headers: {
+                Authorization: `Bearer ${process.env.HF_TOKEN}`,
+                "Content-Type": "application/json",
             },
-            {
-                headers: {
-                    Authorization: `Bearer ${process.env.HF_TOKEN}`,
-                    "Content-Type": "application/json"
-                },
-                timeout: 120000
-            }
-        );
+            data: {
+                inputs: {
+                    image: base64Image
+                }
+            },
+            timeout: 120000
+        });
 
         console.log("✅ HF RESPONSE:", response.data);
 
